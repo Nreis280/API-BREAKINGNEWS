@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "API for SPA Breaking News",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "node index",
     "dev": "nodemon index"
@@ -10,6 +11,7 @@
   "author": "Nicolas Reis",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.1.0",
     "express": "^4.18.2",
     "mongoose": "^7.3.1",
     "nodemon": "^2.0.22"
