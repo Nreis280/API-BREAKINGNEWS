@@ -5,7 +5,7 @@ const NewsSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  Text: {
+  text: {
     type: String,
     required: true,
   },
@@ -33,5 +33,4 @@ const NewsSchema = new mongoose.Schema({
 });
 
 const News = mongoose.model("News", NewsSchema);
-
 export default News;
