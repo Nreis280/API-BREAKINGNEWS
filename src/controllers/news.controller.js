@@ -12,20 +12,120 @@ const create = async (req, res) => {
       title,
       text,
       banner,
-      user: req.user.id,
+      user: req.userId,
     });
 
-    res.send({menssage: "news created"});
+    res.send({ menssage: "news created" });
   } catch (err) {
     res.status(500).send({ message: err.message });
   }
 };
 
 const findAll = async (req, res) => {
-  const news = await newsService.findAllService();
-  if (news.length === 0) {
-    return res.status(400).send({ menssage: "there are no registered news" });
+  try{
+    let { limit, offset } = req.query;
+
+    limit = Number(limit);
+    offset = Number(offset);
+  
+    if (!limit) {
+      limit = 5;
+    }
+  
+    if (!offset) {
+      offset = 0;
+    }
+  
+    const news = await newsService.findAllService(offset, limit);
+    const total = await newsService.countNews();
+    const currentUrl = req.baseUrl;
+  
+    const next = offset + limit;
+    const nextUrl =
+      next < total ? `${currentUrl}?limit=${limit}&offset=${offset}` : null;
+  
+    const previous = offset - limit < 0 ? null : offset - limit;
+    const previousUrl =
+      previous != null ? `${currentUrl}?limit=${limit}&offset=${previous}` : null;
+  
+    if (news.length === 0) {
+      return res.status(400).send({ menssage: "there are no registered news" });
+    }
+    res.send({
+      nextUrl,
+      previousUrl,
+      limit,
+      offset,
+      total,
+  
+      results: news.map((Item) => ({
+        id: Item._id,
+        title: Item.title,
+        text: Item.text,
+        banner: Item.banner,
+        likes: Item.likes,
+        comments: Item.comments,
+        name: Item.user.name,
+        userName: Item.user.username,
+        userAvatar: Item.user.avatar,
+      })),
+    });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
   }
-  res.send(news);
+
 };
-export default { create, findAll };
+
+const topNews = async (req, res) => {
+  try{
+    const news = await newsService.topNewsService();
+
+    if (!news) {
+      return res.status(400).send({menssage: "There is no registered post"})
+    }
+  
+  
+    res.send({
+        news:{
+          id: news._id,
+          title: news.title,
+          text: news.text,
+          banner: news.banner,
+          likes: news.likes,
+          comments: news.comments,
+          name: news.user.name,
+          userName: news.user.username,
+          userAvatar: news.user.avatar,
+        }
+    })
+  }
+  catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+}
+
+const findeById = async (req, res) => {
+  try{
+
+    const {id}= req.params;
+
+    const news = await newsService.findByIdService(id)
+
+    res.send({
+      news:{
+        id: news._id,
+        title: news.title,
+        text: news.text,
+        banner: news.banner,
+        likes: news.likes,
+        comments: news.comments,
+        name: news.user.name,
+        userName: news.user.username,
+        userAvatar: news.user.avatar,
+      }
+    })
+  }catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+}
+export default { create, findAll, topNews, findeById, };
